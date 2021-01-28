@@ -7,5 +7,6 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/skanehira/clipboard-image/v2 v2.0.0
 	github.com/spf13/cobra v1.1.1
+	github.com/spf13/viper v1.7.0
 	golang.org/x/oauth2 v0.0.0-20201109201403-9fd604954f58
 )
