@@ -72,7 +72,6 @@ var uploadCmd = &cobra.Command{
 }
 
 func upload(owner, repo, fileName string, contents []byte) (string, error) {
-	user := viper.GetString("user")
 	email := viper.GetString("email")
 
 	ctx := context.Background()
@@ -81,11 +80,11 @@ func upload(owner, repo, fileName string, contents []byte) (string, error) {
 		Message: github.String("upload file " + fileName),
 		Content: contents,
 		Committer: &github.CommitAuthor{
-			Name:  github.String(user),
+			Name:  github.String(owner),
 			Email: github.String(email),
 		},
 	}
-	resp, _, err := client.Repositories.CreateFile(ctx, user, repo, fileName, opts)
+	resp, _, err := client.Repositories.CreateFile(ctx, owner, repo, fileName, opts)
 	if err != nil {
 		return "", err
 	}
