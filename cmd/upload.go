@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/google/go-github/github"
@@ -49,8 +50,8 @@ var uploadCmd = &cobra.Command{
 				exitError(fmt.Errorf("failed to get contents from clipboard: %w", err))
 			}
 		} else {
-			fileName = args[2]
-			reader, err = os.Open(fileName)
+			fileName = filepath.Base(args[2])
+			reader, err = os.Open(args[2])
 			if err != nil {
 				exitError(fmt.Errorf("failed to open %s: %w", fileName, err))
 			}
