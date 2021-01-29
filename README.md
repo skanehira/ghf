@@ -5,12 +5,11 @@ ghf is cli to manage file in GitHub repository.
 At first, please set access token and email in config.yaml.
 
 ```yaml
-user: "skanehira"
 email: "sho19921005@gmail.com"
 token: "xxxxxxxxxxxxxxxxxx"
 ```
 
-config.yaml must be in the bellow place.
+The config.yaml must be in the bellow place.
 
 | OS         | place                                               |
 |------------|-----------------------------------------------------|
