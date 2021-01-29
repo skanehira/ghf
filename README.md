@@ -41,11 +41,13 @@ $ ghf up {owner} {repo} [filename] [--clip]
 
 # list file
 $ ghf ls {owner} {repo} {branch} [--f]
+
+# delete file
+$ ghf del {owner} {repo} {branch}
 ```
 
 ## TODO
 - download file
-- delete file
 
 ## Author
 skanehira
