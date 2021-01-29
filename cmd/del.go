@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/google/go-github/github"
@@ -51,21 +50,12 @@ func del(owner, repo string, files []github.TreeEntry) {
 				Email: github.String(email),
 			},
 		}
-		_, resp, err := client.Repositories.DeleteFile(ctx, owner, repo, *file.Path, opts)
+		_, _, err := client.Repositories.DeleteFile(ctx, owner, repo, *file.Path, opts)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
 
-		if resp.StatusCode != 200 {
-			msg, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				continue
-			}
-			fmt.Fprintln(os.Stderr, msg)
-			continue
-		}
 		fmt.Println("deleted", *file.Path)
 	}
 }
