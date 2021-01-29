@@ -1,12 +1,12 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -38,58 +38,62 @@ var uploadCmd = &cobra.Command{
 			return
 		}
 
-		var (
-			fileName string
-			reader   io.Reader
-		)
+		files := map[string][]byte{}
 
 		if useClip {
-			fileName = time.Now().Format("20060102150405") + ".png"
-			reader, err = clipboard.Read()
+			reader, err := clipboard.Read()
 			if err != nil {
 				exitError(fmt.Errorf("failed to get contents from clipboard: %w", err))
 			}
-		} else {
-			fileName = filepath.Base(args[2])
-			reader, err = os.Open(args[2])
-			if err != nil {
-				exitError(fmt.Errorf("failed to open %s: %w", fileName, err))
+			buf := &bytes.Buffer{}
+			if _, err := io.Copy(buf, reader); err != nil {
+				exitError(fmt.Errorf("failed to read contents from clipboard: %w", err))
 			}
-		}
+			fileName := time.Now().Format("20060102150405") + ".png"
+			files[fileName] = buf.Bytes()
+		} else {
+			for _, fileName := range args[2:] {
+				b, err := ioutil.ReadFile(fileName)
+				if err != nil {
+					exitError(fmt.Errorf("failed to read file %s: %w", fileName, err))
+				}
 
-		contents, err := ioutil.ReadAll(reader)
-		if err != nil {
-			exitError(fmt.Errorf("failed to read contents: %w", err))
+				files[filepath.Base(fileName)] = b
+			}
 		}
 
 		owner := args[0]
 		repo := args[1]
-		url, err := upload(owner, repo, fileName, contents)
-		if err != nil {
-			exitError(fmt.Errorf("failed to upload: %w", err))
-		}
-		fmt.Println(url)
+		upload(owner, repo, files)
 	},
 }
 
-func upload(owner, repo, fileName string, contents []byte) (string, error) {
+func upload(owner, repo string, files map[string][]byte) {
 	email := viper.GetString("email")
 
 	ctx := context.Background()
 	client := githubClient(ctx)
-	opts := &github.RepositoryContentFileOptions{
-		Message: github.String("upload file " + fileName),
-		Content: contents,
-		Committer: &github.CommitAuthor{
-			Name:  github.String(owner),
-			Email: github.String(email),
-		},
+
+	for name, contents := range files {
+		opts := &github.RepositoryContentFileOptions{
+			Message: github.String("upload file " + name),
+			Content: contents,
+			Committer: &github.CommitAuthor{
+				Name:  github.String(owner),
+				Email: github.String(email),
+			},
+		}
+		repo, resp, err := client.Repositories.CreateFile(ctx, owner, repo, name, opts)
+		if resp.StatusCode == 422 {
+			printError("same file is already exists")
+			continue
+		}
+		if err != nil {
+			printError(err)
+			continue
+		}
+		fmt.Println(*repo.Content.DownloadURL)
 	}
-	resp, _, err := client.Repositories.CreateFile(ctx, owner, repo, fileName, opts)
-	if err != nil {
-		return "", err
-	}
-	return *resp.Content.DownloadURL, nil
 }
 
 func init() {
@@ -97,10 +101,10 @@ func init() {
 	uploadCmd.SetUsageFunc(func(*cobra.Command) error {
 		fmt.Print(`
 Usage:
-  ghf up {owner} {repo} [file] [flags]
+  ghf up {owner} {repo} [file...] [flags]
 
 Examples:
-  $ ghf up skanehira images sample.png
+  $ ghf up skanehira images sample1.png sample2.png
   $ ghf up skanehira images --clip
 
 Flags:
