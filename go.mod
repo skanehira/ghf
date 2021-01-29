@@ -1,4 +1,4 @@
-module github.com/skanehira/ghimg
+module github.com/skanehira/ghf
 
 go 1.15
 

@@ -1,14 +1,14 @@
-# ghimg
+# ghf
 
 ## Usage
 
 ```sh
 # upload file
 # if upload from clipboard then use --clip
-$ ghimg up {owner} {repo} [filename] [--clip]
+$ ghf up {owner} {repo} [filename] [--clip]
 
 # list file
-$ ghimg ls {owner} {repo} {branch} [--f]
+$ ghf ls {owner} {repo} {branch} [--f]
 ```
 
 ## TODO

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/skanehira/ghimg/cmd"
+	"github.com/skanehira/ghf/cmd"
 )
 
 func main() {
