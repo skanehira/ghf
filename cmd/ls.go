@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/go-github/github"
+	"github.com/ktr0731/go-fuzzyfinder"
 	"github.com/spf13/cobra"
 )
 
@@ -27,18 +29,45 @@ var lsCmd = &cobra.Command{
 		tree, _, err := client.Git.GetTree(ctx, user, repo, branch, true)
 		if err != nil {
 			exitError(fmt.Errorf("failed to get branch info: %w", err))
-			return
 		}
 
-		files := make([]string, len(tree.Entries))
-		for i, e := range tree.Entries {
-			files[i] = *e.Path
-			fmt.Println(*e.Path)
+		useFuzzy, err := cmd.PersistentFlags().GetBool("f")
+		if err != nil {
+			exitError(fmt.Errorf("failed to get flags: %w", err))
+		}
+
+		var files []github.TreeEntry
+		for _, e := range tree.Entries {
+			if *e.Type == "tree" {
+				continue
+			}
+			files = append(files, e)
+		}
+
+		if useFuzzy {
+			idx, err := fuzzyfinder.FindMulti(
+				files,
+				func(i int) string {
+					return *files[i].Path
+				},
+			)
+			if err != nil {
+				exitError(err)
+			}
+
+			for _, i := range idx {
+				fmt.Println(*files[i].URL)
+			}
+		} else {
+			for _, e := range files {
+				fmt.Println(*e.Path)
+			}
 		}
 	},
 }
 
 func init() {
+	lsCmd.PersistentFlags().Bool("f", false, "fuzyy selector")
 	lsCmd.SetUsageFunc(func(*cobra.Command) error {
 		fmt.Print(`
 Usage:
