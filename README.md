@@ -23,7 +23,7 @@ $ go install
 ```
 
 ## Settings
-At first, please set access token and email in config.yaml.
+At first, please set access [token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) and email in config.yaml.
 
 ```yaml
 email: "sho19921005@gmail.com"
