@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/google/go-github/github"
 	"github.com/ktr0731/go-fuzzyfinder"
@@ -20,50 +21,62 @@ var lsCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		user := args[0]
+		owner := args[0]
 		repo := args[1]
 		branch := args[2]
-
-		ctx := context.Background()
-		client := githubClient(ctx)
-		tree, _, err := client.Git.GetTree(ctx, user, repo, branch, true)
-		if err != nil {
-			exitError(fmt.Errorf("failed to get branch info: %w", err))
-		}
-
 		useFuzzy, err := cmd.PersistentFlags().GetBool("f")
 		if err != nil {
 			exitError(fmt.Errorf("failed to get flags: %w", err))
 		}
+		files := ls(owner, repo, branch, useFuzzy)
 
-		var files []github.TreeEntry
-		for _, e := range tree.Entries {
-			if *e.Type == "tree" {
-				continue
-			}
+		builder := &strings.Builder{}
+
+		for _, f := range files {
+			builder.WriteString(fmt.Sprintln(*f.Path))
+		}
+
+		fmt.Println(strings.TrimRight(builder.String(), "\r\n"))
+	},
+}
+
+func ls(owner, repo, branch string, useFuzzy bool) []github.TreeEntry {
+	ctx := context.Background()
+	client := githubClient(ctx)
+	tree, _, err := client.Git.GetTree(ctx, owner, repo, branch, true)
+	if err != nil {
+		exitError(fmt.Errorf("failed to get branch info: %w", err))
+	}
+
+	var entries []github.TreeEntry
+	for _, e := range tree.Entries {
+		if *e.Type == "tree" {
+			continue
+		}
+		entries = append(entries, e)
+	}
+
+	var files []github.TreeEntry
+	if useFuzzy {
+		idx, err := fuzzyfinder.FindMulti(
+			entries,
+			func(i int) string {
+				return *entries[i].Path
+			},
+		)
+		if err != nil {
+			exitError(err)
+		}
+
+		for _, i := range idx {
+			files = append(files, entries[i])
+		}
+	} else {
+		for _, e := range entries {
 			files = append(files, e)
 		}
-
-		if useFuzzy {
-			idx, err := fuzzyfinder.FindMulti(
-				files,
-				func(i int) string {
-					return *files[i].Path
-				},
-			)
-			if err != nil {
-				exitError(err)
-			}
-
-			for _, i := range idx {
-				fmt.Println(*files[i].URL)
-			}
-		} else {
-			for _, e := range files {
-				fmt.Println(*e.Path)
-			}
-		}
-	},
+	}
+	return files
 }
 
 func init() {
@@ -77,11 +90,13 @@ Examples:
   $ ghf ls skanehira ghf master
 
 Args:
+  owner    owner
   repo     repository
+  branch   branch
 
 Flags:
+      --f      fuzyy selector
   -h, --help   help for ls
-  -f           fuzyy selector
 `)
 		return nil
 	})

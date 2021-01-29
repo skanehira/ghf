@@ -1,6 +1,21 @@
 # ghf
 ghf is cli to manage file in GitHub repository.
 
+```sh
+$ ghf up skanehira images --clip
+https://raw.githubusercontent.com/skanehira/images/main/20210129125731.png?token=AB4F5T5GEVU3VYFT5CWI2ILACOD6Q
+
+$ ghf ls skanehira images main
+20201112090031.png
+20210129124442.png
+20210129124829.png
+20210129125731.png
+```
+
+## Requrements
+- file(Linux only)
+- xclip(Linux only)
+
 ## Settings
 At first, please set access token and email in config.yaml.
 

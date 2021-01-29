@@ -1,0 +1,94 @@
+package cmd
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"os"
+
+	"github.com/google/go-github/github"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
+
+var delCmd = &cobra.Command{
+	Use:   "del",
+	Short: "del file",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 3 {
+			return errors.New("owner, repo and branch name is required")
+		}
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		owner := args[0]
+		repo := args[1]
+		branch := args[2]
+
+		useFuzzy, err := cmd.PersistentFlags().GetBool("f")
+		if err != nil {
+			exitError(fmt.Errorf("failed to get flags: %w", err))
+		}
+
+		del(owner, repo, ls(owner, repo, branch, useFuzzy))
+	},
+}
+
+func del(owner, repo string, files []github.TreeEntry) {
+	email := viper.GetString("email")
+
+	ctx := context.Background()
+	client := githubClient(ctx)
+
+	for _, file := range files {
+		opts := &github.RepositoryContentFileOptions{
+			Message: github.String("delete file " + *file.Path),
+			SHA:     file.SHA,
+			Committer: &github.CommitAuthor{
+				Name:  github.String(owner),
+				Email: github.String(email),
+			},
+		}
+		_, resp, err := client.Repositories.DeleteFile(ctx, owner, repo, *file.Path, opts)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			continue
+		}
+
+		if resp.StatusCode != 200 {
+			msg, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
+			fmt.Fprintln(os.Stderr, msg)
+			continue
+		}
+		fmt.Println("deleted", *file.Path)
+	}
+}
+
+func init() {
+	delCmd.PersistentFlags().Bool("f", false, "fuzyy selector")
+	delCmd.SetUsageFunc(func(*cobra.Command) error {
+		fmt.Print(`
+Usage:
+  ghf del {owner} {repo} {branch}
+
+Examples:
+  $ ghf del skanehira ghf master
+
+Args:
+  owner    owner
+  repo     repository
+  branch   branch
+
+Flags:
+  -h, --help   help for ls
+`)
+		return nil
+	})
+	rootCmd.AddCommand(delCmd)
+}
