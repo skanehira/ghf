@@ -16,6 +16,12 @@ $ ghf ls skanehira images main
 - file(Linux only)
 - xclip(Linux only)
 
+## Installation
+```
+$ git clone https://github.com/skanehira/ghf.git
+$ go install
+```
+
 ## Settings
 At first, please set access token and email in config.yaml.
 
