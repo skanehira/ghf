@@ -5,17 +5,15 @@
 ```sh
 # upload file
 # if upload from clipboard then use --clip
-$ ghimg up {repo} {filename} [--clip]
-
-# delete file
-$ ghimg del {repo} {filename}
-
-# download file
-$ ghimg get {repo} {filename}
+$ ghimg up {owner} {repo} [filename] [--clip]
 
 # list file
-$ ghimg ls {repo}
+$ ghimg ls {owner} {repo} {branch} [--f]
 ```
+
+## TODO
+- download file
+- delete file
 
 ## Author
 skanehira
