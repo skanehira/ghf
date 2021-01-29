@@ -43,7 +43,7 @@ The config.yaml must be in the bellow place.
 ```sh
 # upload file
 # if upload from clipboard then use --clip
-$ ghf up {owner} {repo} [filename] [--clip]
+$ ghf up {owner} {repo} [file...] [--clip]
 
 # list file
 $ ghf ls {owner} {repo} {branch} [--f]
