@@ -31,6 +31,10 @@ var uploadCmd = &cobra.Command{
 		if err != nil {
 			return
 		}
+		dir, err := cmd.PersistentFlags().GetString("dir")
+		if err != nil {
+			return
+		}
 
 		if !useClip && len(args) == 2 {
 			printError("file is required")
@@ -49,8 +53,8 @@ var uploadCmd = &cobra.Command{
 			if _, err := io.Copy(buf, reader); err != nil {
 				exitError(fmt.Errorf("failed to read contents from clipboard: %w", err))
 			}
-			fileName := time.Now().Format("20060102150405") + ".png"
-			files[fileName] = buf.Bytes()
+			path := filepath.Join(dir, time.Now().Format("20060102150405.999999999")+".png")
+			files[path] = buf.Bytes()
 		} else {
 			for _, fileName := range args[2:] {
 				b, err := ioutil.ReadFile(fileName)
@@ -58,7 +62,8 @@ var uploadCmd = &cobra.Command{
 					exitError(fmt.Errorf("failed to read file %s: %w", fileName, err))
 				}
 
-				files[filepath.Base(fileName)] = b
+				path := filepath.Join(dir, filepath.Base(fileName))
+				files[path] = b
 			}
 		}
 
@@ -98,6 +103,7 @@ func upload(owner, repo string, files map[string][]byte) {
 
 func init() {
 	uploadCmd.PersistentFlags().Bool("clip", false, "upload from clipboard")
+	uploadCmd.PersistentFlags().String("dir", time.Now().Format("20060102150405"), "file directory")
 	uploadCmd.SetUsageFunc(func(*cobra.Command) error {
 		fmt.Print(`
 Usage:
@@ -106,8 +112,10 @@ Usage:
 Examples:
   $ ghf up skanehira images sample1.png sample2.png
   $ ghf up skanehira images --clip
+  $ ghf up skanehira images sample.png --dir gorilla
 
 Flags:
+      --dir    file directory
       --clip   upload from clipboard
   -h, --help   help for up
 `)
