@@ -40,20 +40,38 @@ The config.yaml must be in the bellow place.
 
 ## Usage
 
+### upload
+
 ```sh
-# upload file
-# if upload from clipboard then use --clip
-$ ghf up {owner} {repo} [file...] [--clip]
+Usage:
+  ghf up {owner} {repo} [file...] [flags]
 
-# list file
-$ ghf ls {owner} {repo} {branch} [--f]
-
-# delete file
-$ ghf del {owner} {repo} {branch}
+Examples:
+  $ ghf up skanehira images sample1.png sample2.png
+  $ ghf up skanehira images --clip
+  $ ghf up skanehira images sample.png --dir gorilla
 ```
 
-## TODO
-- download file
+### list
+
+```sh
+Usage:
+  ghf ls {owner} {repo} {branch} [--f]
+
+Examples:
+  $ ghf ls skanehira ghf master
+  $ ghf ls skanehira ghf master --f
+```
+
+### del
+
+```Sh
+Usage:
+  ghf del {owner} {repo} {branch}
+
+Examples:
+  $ ghf del skanehira ghf master
+```
 
 ## Author
 skanehira

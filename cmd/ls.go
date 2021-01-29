@@ -88,6 +88,7 @@ Usage:
 
 Examples:
   $ ghf ls skanehira ghf master
+  $ ghf ls skanehira ghf master --f
 
 Args:
   owner    owner
