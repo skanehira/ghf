@@ -71,7 +71,7 @@ func init() {
 	lsCmd.SetUsageFunc(func(*cobra.Command) error {
 		fmt.Print(`
 Usage:
-  ghf ls {owner} {repo} {branch}
+  ghf ls {owner} {repo} {branch} [--f]
 
 Examples:
   $ ghf ls skanehira ghf master
@@ -81,6 +81,7 @@ Args:
 
 Flags:
   -h, --help   help for ls
+  -f           fuzyy selector
 `)
 		return nil
 	})
