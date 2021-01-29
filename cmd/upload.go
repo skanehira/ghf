@@ -10,18 +10,18 @@ import (
 	"time"
 
 	"github.com/google/go-github/github"
+
 	"github.com/skanehira/clipboard-image/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/oauth2"
 )
 
 var uploadCmd = &cobra.Command{
 	Use:   "up",
 	Short: "upload file",
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("repo is required")
+		if len(args) < 2 {
+			return errors.New("owner and repo is required")
 		}
 		return nil
 	},
@@ -31,7 +31,7 @@ var uploadCmd = &cobra.Command{
 			return
 		}
 
-		if !useClip && len(args) == 1 {
+		if !useClip && len(args) == 2 {
 			printError("file is required")
 			cmd.Usage()
 			return
@@ -49,7 +49,7 @@ var uploadCmd = &cobra.Command{
 				exitError(fmt.Errorf("failed to get contents from clipboard: %w", err))
 			}
 		} else {
-			fileName = args[1]
+			fileName = args[2]
 			reader, err = os.Open(fileName)
 			if err != nil {
 				exitError(fmt.Errorf("failed to open %s: %w", fileName, err))
@@ -61,8 +61,9 @@ var uploadCmd = &cobra.Command{
 			exitError(fmt.Errorf("failed to read contents: %w", err))
 		}
 
-		repo := args[0]
-		url, err := upload(repo, fileName, contents)
+		owner := args[0]
+		repo := args[1]
+		url, err := upload(owner, repo, fileName, contents)
 		if err != nil {
 			exitError(fmt.Errorf("failed to upload: %w", err))
 		}
@@ -70,17 +71,12 @@ var uploadCmd = &cobra.Command{
 	},
 }
 
-func upload(repo, fileName string, contents []byte) (string, error) {
-	token := viper.GetString("token")
+func upload(owner, repo, fileName string, contents []byte) (string, error) {
 	user := viper.GetString("user")
 	email := viper.GetString("email")
 
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
 	ctx := context.Background()
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
+	client := githubClient(ctx)
 	opts := &github.RepositoryContentFileOptions{
 		Message: github.String("upload file " + fileName),
 		Content: contents,
@@ -101,20 +97,15 @@ func init() {
 	uploadCmd.SetUsageFunc(func(*cobra.Command) error {
 		fmt.Print(`
 Usage:
-  ghf up {repo} {file} [flags]
+  ghf up {owner} {repo} [file] [flags]
 
 Examples:
-  $ ghf up {repo} {file}
-  $ ghf up {repo} --clip
-
-Args:
-  repo     repository
-  file     file
+  $ ghf up skanehira images sample.png
+  $ ghf up skanehira images --clip
 
 Flags:
       --clip   upload from clipboard
   -h, --help   help for up
-
 `)
 		return nil
 	})

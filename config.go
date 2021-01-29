@@ -30,10 +30,6 @@ func initConfig() error {
 		return errors.New("not found token")
 	}
 
-	if !viper.IsSet("user") {
-		return errors.New("not found user")
-	}
-
 	viper.SetDefault("email", "unknown")
 
 	return nil
