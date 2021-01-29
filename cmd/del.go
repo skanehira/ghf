@@ -26,12 +26,7 @@ var delCmd = &cobra.Command{
 		repo := args[1]
 		branch := args[2]
 
-		useFuzzy, err := cmd.PersistentFlags().GetBool("f")
-		if err != nil {
-			exitError(fmt.Errorf("failed to get flags: %w", err))
-		}
-
-		del(owner, repo, ls(owner, repo, branch, useFuzzy))
+		del(owner, repo, ls(owner, repo, branch, true))
 	},
 }
 
