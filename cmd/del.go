@@ -56,7 +56,6 @@ func del(owner, repo string, files []github.TreeEntry) {
 }
 
 func init() {
-	delCmd.PersistentFlags().Bool("f", false, "fuzyy selector")
 	delCmd.SetUsageFunc(func(*cobra.Command) error {
 		fmt.Print(`
 Usage:
