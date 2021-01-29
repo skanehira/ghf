@@ -13,13 +13,14 @@ func initConfig() error {
 	if err != nil {
 		return err
 	}
-	cfg := filepath.Join(cfd, "ghf", "config.yaml")
+	cfg := filepath.Join(cfd, "ghf")
 
 	if _, err := os.Stat(cfg); os.IsNotExist(err) {
 		return err
 	}
 
 	viper.AddConfigPath(cfg)
+	viper.SetConfigType("yaml")
 
 	if err := viper.ReadInConfig(); err != nil {
 		return err
@@ -29,7 +30,10 @@ func initConfig() error {
 		return errors.New("not found token")
 	}
 
-	viper.SetDefault("user", "unknown")
+	if !viper.IsSet("user") {
+		return errors.New("not found user")
+	}
+
 	viper.SetDefault("email", "unknown")
 
 	return nil

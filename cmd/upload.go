@@ -12,6 +12,7 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/skanehira/clipboard-image/v2"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
 )
 
@@ -20,60 +21,59 @@ var uploadCmd = &cobra.Command{
 	Short: "upload file",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return errors.New("repo name is required")
+			return errors.New("repo is required")
 		}
 		return nil
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		useClip, err := cmd.PersistentFlags().GetBool("clip")
 		if err != nil {
-			return err
+			return
 		}
 
 		if !useClip && len(args) == 1 {
-			return errors.New("file is required")
+			printError("file is required")
+			cmd.Usage()
+			return
 		}
 
 		var (
 			fileName string
-			r        io.Reader
+			reader   io.Reader
 		)
 
 		if useClip {
 			fileName = time.Now().Format("20060102150405") + ".png"
-			r, err = clipboard.Read()
+			reader, err = clipboard.Read()
 			if err != nil {
-				return fmt.Errorf("failed to get contents from clipboard: %w", err)
+				exitError(fmt.Errorf("failed to get contents from clipboard: %w", err))
 			}
 		} else {
 			fileName = args[1]
-			r, err = os.Open(fileName)
+			reader, err = os.Open(fileName)
 			if err != nil {
-				return fmt.Errorf("failed to open %s: %w", fileName, err)
+				exitError(fmt.Errorf("failed to open %s: %w", fileName, err))
 			}
 		}
 
-		contents, err := ioutil.ReadAll(r)
+		contents, err := ioutil.ReadAll(reader)
 		if err != nil {
-			return fmt.Errorf("failed to read contents: %w", err)
+			exitError(fmt.Errorf("failed to read contents: %w", err))
 		}
 
 		repo := args[0]
 		url, err := upload(repo, fileName, contents)
 		if err != nil {
-			return err
+			exitError(fmt.Errorf("failed to upload: %w", err))
 		}
 		fmt.Println(url)
-
-		return nil
 	},
 }
 
 func upload(repo, fileName string, contents []byte) (string, error) {
-	// TODO get info from config
-	token := ""
-	user := ""
-	email := ""
+	token := viper.GetString("token")
+	user := viper.GetString("user")
+	email := viper.GetString("email")
 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},

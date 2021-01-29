@@ -9,7 +9,16 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "ghf",
-	Short: "ghf is cli which manage file in GitHub repository",
+	Short: "ghf is cli to manage file in GitHub repository",
+}
+
+func printError(msg interface{}) {
+	fmt.Fprintln(os.Stderr, msg)
+}
+
+func exitError(msg interface{}) {
+	printError(msg)
+	os.Exit(1)
 }
 
 func Execute() {
