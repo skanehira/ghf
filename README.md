@@ -19,6 +19,7 @@ $ ghf ls skanehira images main
 ## Installation
 ```
 $ git clone https://github.com/skanehira/ghf.git
+$ cd ghf
 $ go install
 ```
 
