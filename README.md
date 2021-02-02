@@ -2,7 +2,7 @@
 ghf is cli to manage file in GitHub repository.
 
 ```sh
-$ ghf up skanehira images --clip
+$ ghf up skanehira images main --clip
 https://raw.githubusercontent.com/skanehira/images/main/20210129125731.png?token=AB4F5T5GEVU3VYFT5CWI2ILACOD6Q
 
 $ ghf ls skanehira images main
@@ -44,12 +44,12 @@ The config.yaml must be in the bellow place.
 
 ```sh
 Usage:
-  ghf up {owner} {repo} [file...] [flags]
+  ghf up {owner} {repo} {branch} [file...] [flags]
 
 Examples:
-  $ ghf up skanehira images sample1.png sample2.png
-  $ ghf up skanehira images --clip
-  $ ghf up skanehira images sample.png --dir gorilla
+  $ ghf up skanehira images main sample1.png sample2.png
+  $ ghf up skanehira images main --clip
+  $ ghf up skanehira images main sample.png --dir gorilla
 ```
 
 ### list
