@@ -21,8 +21,8 @@ var uploadCmd = &cobra.Command{
 	Use:   "up",
 	Short: "upload file",
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 2 {
-			return errors.New("owner and repo is required")
+		if len(args) < 3 {
+			return errors.New("owner, repo and branch is required")
 		}
 		return nil
 	},
@@ -36,7 +36,7 @@ var uploadCmd = &cobra.Command{
 			return
 		}
 
-		if !useClip && len(args) == 2 {
+		if !useClip && len(args) == 3 {
 			printError("file is required")
 			cmd.Usage()
 			return
@@ -56,7 +56,7 @@ var uploadCmd = &cobra.Command{
 			path := filepath.Join(dir, time.Now().Format("20060102150405.999999999")+".png")
 			files[path] = buf.Bytes()
 		} else {
-			for _, fileName := range args[2:] {
+			for _, fileName := range args[3:] {
 				b, err := ioutil.ReadFile(fileName)
 				if err != nil {
 					exitError(fmt.Errorf("failed to read file %s: %w", fileName, err))
@@ -69,11 +69,12 @@ var uploadCmd = &cobra.Command{
 
 		owner := args[0]
 		repo := args[1]
-		upload(owner, repo, files)
+		branch := args[2]
+		upload(owner, repo, branch, files)
 	},
 }
 
-func upload(owner, repo string, files map[string][]byte) {
+func upload(owner, repo string, branch string, files map[string][]byte) {
 	email := viper.GetString("email")
 
 	ctx := context.Background()
@@ -87,6 +88,7 @@ func upload(owner, repo string, files map[string][]byte) {
 				Name:  github.String(owner),
 				Email: github.String(email),
 			},
+			Branch: &branch,
 		}
 		repo, resp, err := client.Repositories.CreateFile(ctx, owner, repo, name, opts)
 		if resp.StatusCode == 422 {
@@ -107,12 +109,12 @@ func init() {
 	uploadCmd.SetUsageFunc(func(*cobra.Command) error {
 		fmt.Print(`
 Usage:
-  ghf up {owner} {repo} [file...] [flags]
+  ghf up {owner} {repo} {branch} [file...] [flags]
 
 Examples:
-  $ ghf up skanehira images sample1.png sample2.png
-  $ ghf up skanehira images --clip
-  $ ghf up skanehira images sample.png --dir gorilla
+  $ ghf up skanehira images main sample1.png sample2.png
+  $ ghf up skanehira images main --clip
+  $ ghf up skanehira images main sample.png --dir gorilla
 
 Flags:
       --dir    file directory
