@@ -26,11 +26,11 @@ var delCmd = &cobra.Command{
 		repo := args[1]
 		branch := args[2]
 
-		del(owner, repo, ls(owner, repo, branch, true))
+		del(owner, repo, branch, ls(owner, repo, branch, true))
 	},
 }
 
-func del(owner, repo string, files []github.TreeEntry) {
+func del(owner, repo string, branch string, files []github.TreeEntry) {
 	email := viper.GetString("email")
 
 	ctx := context.Background()
@@ -44,6 +44,7 @@ func del(owner, repo string, files []github.TreeEntry) {
 				Name:  github.String(owner),
 				Email: github.String(email),
 			},
+			Branch: &branch,
 		}
 		_, _, err := client.Repositories.DeleteFile(ctx, owner, repo, *file.Path, opts)
 		if err != nil {
