@@ -22,7 +22,7 @@ var uploadCmd = &cobra.Command{
 	Short: "upload file",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 3 {
-			return errors.New("owner and repo and branch is required")
+			return errors.New("owner, repo and branch is required")
 		}
 		return nil
 	},
