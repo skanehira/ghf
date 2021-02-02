@@ -21,8 +21,8 @@ var uploadCmd = &cobra.Command{
 	Use:   "up",
 	Short: "upload file",
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 2 {
-			return errors.New("owner and repo is required")
+		if len(args) < 3 {
+			return errors.New("owner and repo and branch is required")
 		}
 		return nil
 	},
@@ -36,7 +36,7 @@ var uploadCmd = &cobra.Command{
 			return
 		}
 
-		if !useClip && len(args) == 2 {
+		if !useClip && len(args) == 3 {
 			printError("file is required")
 			cmd.Usage()
 			return
