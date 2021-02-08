@@ -100,7 +100,7 @@ func upload(owner, repo string, branch string, files map[string][]byte) {
 			printError(err)
 			continue
 		}
-		fmt.Println(*repo.Content.DownloadURL)
+		fmt.Println(*repo.Content.HTMLURL + "?raw=true")
 	}
 }
 
