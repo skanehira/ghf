@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -53,7 +54,7 @@ var uploadCmd = &cobra.Command{
 			if _, err := io.Copy(buf, reader); err != nil {
 				exitError(fmt.Errorf("failed to read contents from clipboard: %w", err))
 			}
-			path := filepath.Join(dir, time.Now().Format("20060102150405.999999999")+".png")
+			path := path.Join(dir, time.Now().Format("20060102150405.999999999")+".png")
 			files[path] = buf.Bytes()
 		} else {
 			for _, fileName := range args[3:] {
