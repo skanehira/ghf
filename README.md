@@ -3,7 +3,7 @@ ghf is cli to manage file in GitHub repository.
 
 ```sh
 $ ghf up skanehira images main --clip
-https://raw.githubusercontent.com/skanehira/images/main/20210129125731.png?token=AB4F5T5GEVU3VYFT5CWI2ILACOD6Q
+https://github.com/skanehira/images/blob/main/20210608112123/20210608112123.353633.png?raw=true
 
 $ ghf ls skanehira images main
 20201112090031.png
