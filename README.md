@@ -17,10 +17,8 @@ $ ghf ls skanehira images main
 - xclip(Linux only)
 
 ## Installation
-```
-$ git clone https://github.com/skanehira/ghf.git
-$ cd ghf
-$ go install
+```shell
+$ go install github.com/skanehira/ghf@latest
 ```
 
 ## Settings
